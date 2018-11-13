@@ -6,11 +6,18 @@ const Event = require("../../models/Events");
 
 const validateAddEventInput = require("../../validation/addEvent");
 
-router.get("/test", (req, res) => {
-  res.json({ msg: "Events works" });
+router.get("/get", (req, res) => {
+  Event.find({ is_active: true })
+    .select({ details: 0 })
+    .populate(["club", "eventType", "eventCategory", "banner"])
+    .exec((err, events) => {
+      if (err) throw err;
+
+      res.json(events);
+    });
 });
 
-router.get("/get", (req, res) => {
+router.get("/get_all", (req, res) => {
   Event.find()
     .select({ details: 0 })
     .populate(["club", "eventType", "eventCategory", "banner"])
@@ -45,10 +52,10 @@ router.post("/add", (req, res) => {
     oneDayOny: req.body.oneDayOnly,
     isWholeDay: req.body.isWholeDay,
     dateOfEvent: req.body.dateOfEvent,
-    from: req.body.from,
+    from: req.body.isWholeDay ? "" : req.body.from,
     timefrom: req.body.timeFrom,
     timeTo: req.body.timeTo,
-    to: req.body.to,
+    to: req.body.isWholeDay ? "" : req.body.to,
     eventType: req.body.eventType,
     eventCategory: req.body.eventCategory,
     numberOfPlayers: req.body.numberOfPlayers,

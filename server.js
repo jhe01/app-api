@@ -36,13 +36,7 @@ const pass = require("./config/keys").pass;
 let gfs;
 
 const conn = mongoose
-  .connect(
-    db,
-    {
-      user: user,
-      pass: pass
-    }
-  )
+  .connect(db)
   .then(db => {
     // console.log(mongoose.connection);
     gfs = Grid(db.connection.db, mongoose.mongo);
