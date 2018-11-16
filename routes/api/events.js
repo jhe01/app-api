@@ -29,7 +29,7 @@ router.get("/get_all", (req, res) => {
 });
 
 router.post("/get_by_month", (req, res) => {
-  Event.find({ date_created: { $gte: req.body.fromDay, $lte: req.body.toDay } })
+  Event.find({ date_created: { $gte: req.body.fromDay, $lte: req.body.toDay }, is_active: true })
     .select({ details: 0 })
     .populate(["club", "eventType", "eventCategory", "banner"])
     .exec((err, events) => {
