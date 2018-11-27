@@ -130,14 +130,18 @@ app.post("/api/upload/add/:id", upload.single("file"), (req, res) => {
       }
       event.banner.splice(0, 1);
       event.banner.push(newBanner);
-      event.save();
-    })
-      .populate(["club", "eventType", "eventCategory"])
-      .exec((err, event) => {
-        if (err) throw err;
+      event.save(err => {
+        if (err) return res.status(404).json({ err: err });
 
-        res.json(event);
+        Event.findOne({ _id: req.params.id })
+          .populate(["club", "eventType", "eventCategory", "banner"])
+          .exec((err, ev) => {
+            if (err) throw err;
+
+            res.json(ev);
+          });
       });
+    });
   }
 });
 

@@ -29,7 +29,10 @@ router.get("/get_all", (req, res) => {
 });
 
 router.post("/get_by_month", (req, res) => {
-  Event.find({ date_created: { $gte: req.body.fromDay, $lte: req.body.toDay }, is_active: true })
+  Event.find({
+    date_created: { $gte: req.body.fromDay, $lte: req.body.toDay },
+    is_active: true
+  })
     .select({ details: 0 })
     .populate(["club", "eventType", "eventCategory", "banner"])
     .exec((err, events) => {
@@ -103,10 +106,10 @@ router.post(
     updEvent.oneDayOnly = req.body.oneDayOnly;
     updEvent.isWholeDay = req.body.isWholeDay;
     updEvent.dateOfEvent = req.body.dateOfEvent;
-    updEvent.from = req.body.isWholeDay ? "" : req.body.from;
+    updEvent.from = req.body.oneDayOnly ? "" : req.body.from;
     updEvent.timeFrom = req.body.timeFrom;
     updEvent.timeTo = req.body.timeTo;
-    updEvent.to = req.body.isWholeDay ? "" : req.body.to;
+    updEvent.to = req.body.oneDayOnly ? "" : req.body.to;
     updEvent.eventType = req.body.eventType;
     updEvent.eventCategory = req.body.eventCategory;
     updEvent.numberOfPlayers = req.body.numberOfPlayers;
