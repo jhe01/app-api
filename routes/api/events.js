@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
+const moment = require("moment");
 
 const Event = require("../../models/Events");
 
@@ -29,16 +30,41 @@ router.get("/get_all", (req, res) => {
 });
 
 router.post("/get_by_month", (req, res) => {
-  Event.find({
-    date_created: { $gte: req.body.fromDay, $lte: req.body.toDay },
-    is_active: true
-  })
+  // {
+  //   dateOfEvent: { $gte: req.body.fromDay, $lte: req.body.toDay },
+  //   from: { $gte: req.body.fromDay },
+  //   to: { $lte: req.body.toDay },
+  //   is_active: true
+  // }
+  Event.find()
     .select({ details: 0 })
     .populate(["club", "eventType", "eventCategory", "banner"])
     .exec((err, events) => {
       if (err) throw err;
 
-      res.json(events);
+      let evnts = [];
+
+      evnts = events.filter(event => {
+        if (event.oneDayOnly) {
+          return moment(event.dateOfEvent, "MM-DD-YYYY").isBetween(
+            moment(req.body.fromDay, "MM-DD-YYYY"),
+            moment(req.body.toDay, "MM-DD-YYYY")
+          );
+        } else {
+          return (
+            moment(event.from, "MM-DD-YYYY").isBetween(
+              moment(req.body.fromDay, "MM-DD-YYYY"),
+              moment(req.body.toDay, "MM-DD-YYYY")
+            ) ||
+            moment(event.to, "MM-DD-YYYY").isBetween(
+              moment(req.body.fromDay, "MM-DD-YYYY"),
+              moment(req.body.toDay, "MM-DD-YYYY")
+            )
+          );
+        }
+      });
+
+      res.json(evnts);
     });
 });
 

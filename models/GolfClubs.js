@@ -22,6 +22,158 @@ const GolfClubsSchema = new Schema({
       }
     }
   ],
+  logo: [
+    {
+      fieldname: {
+        type: String,
+        required: false
+      },
+      originalname: {
+        type: String,
+        required: false
+      },
+      mimetype: {
+        type: String,
+        required: false
+      },
+      upid: {
+        type: String,
+        required: false
+      },
+      filename: {
+        type: String,
+        required: false
+      },
+      metadata: {
+        type: String,
+        required: false
+      },
+      uploadDate: {
+        type: Date,
+        required: false
+      },
+      contentType: {
+        type: String,
+        required: false
+      }
+    }
+  ],
+  address: {
+    type: String,
+    required: false
+  },
+  maintenance_day: {
+    type: String,
+    required: false
+  },
+  policies: [
+    {
+      name: {
+        type: String,
+        required: false
+      },
+      is_allowed: {
+        type: Boolean,
+        required: false
+      }
+    }
+  ],
+  services: [
+    {
+      name: {
+        type: String,
+        required: false
+      }
+    }
+  ],
+  facilities: [
+    {
+      name: {
+        type: String,
+        required: false
+      }
+    }
+  ],
+  facility_images: [
+    {
+      caption: {
+        type: String,
+        required: false
+      },
+      fieldname: {
+        type: String,
+        required: false
+      },
+      originalname: {
+        type: String,
+        required: false
+      },
+      mimetype: {
+        type: String,
+        required: false
+      },
+      upid: {
+        type: String,
+        required: false
+      },
+      filename: {
+        type: String,
+        required: false
+      },
+      metadata: {
+        type: String,
+        required: false
+      },
+      uploadDate: {
+        type: Date,
+        required: false
+      },
+      contentType: {
+        type: String,
+        required: false
+      }
+    }
+  ],
+  fairway_images: [
+    {
+      caption: {
+        type: String,
+        required: false
+      },
+      fieldname: {
+        type: String,
+        required: false
+      },
+      originalname: {
+        type: String,
+        required: false
+      },
+      mimetype: {
+        type: String,
+        required: false
+      },
+      upid: {
+        type: String,
+        required: false
+      },
+      filename: {
+        type: String,
+        required: false
+      },
+      metadata: {
+        type: String,
+        required: false
+      },
+      uploadDate: {
+        type: Date,
+        required: false
+      },
+      contentType: {
+        type: String,
+        required: false
+      }
+    }
+  ],
   is_active: {
     type: Boolean,
     default: true

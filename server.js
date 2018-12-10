@@ -13,6 +13,7 @@ const golfclubs = require("./routes/api/golfclubs");
 const golfcourse = require("./routes/api/golfcourse");
 const eventcategory = require("./routes/api/event_category");
 const eventtype = require("./routes/api/event_types");
+const recent_event_album = require("./routes/api/recent_event_album");
 // const upload = require("./routes/api/upload");
 
 // Upload
@@ -23,6 +24,8 @@ const Grid = require("gridfs-stream");
 
 const Uploads = require("./models/Uploads");
 const Event = require("./models/Events");
+const GolfClubRecentEventAlbum = require("./models/GolfClubRecentEventAlbum");
+const GolfClubs = require("./models/GolfClubs");
 
 const app = express();
 
@@ -82,6 +85,7 @@ app.use("/api/golfclubs", golfclubs);
 app.use("/api/roles", roles);
 app.use("/api/eventcategory", eventcategory);
 app.use("/api/eventtype", eventtype);
+app.use("/api/album", recent_event_album);
 
 // Routes - upload
 // app.use("/api/upload", upload);
@@ -135,6 +139,83 @@ app.post("/api/upload/add/:id", upload.single("file"), (req, res) => {
 
         Event.findOne({ _id: req.params.id })
           .populate(["club", "eventType", "eventCategory", "banner"])
+          .exec((err, ev) => {
+            if (err) throw err;
+
+            res.json(ev);
+          });
+      });
+    });
+  }
+});
+
+app.post("/api/club/upload/add/:id", upload.single("file"), (req, res) => {
+  const file = req.file;
+
+  if (file.id) {
+    GolfClubs.findOne({ _id: req.params.id }, (err, club) => {
+      if (err) throw err;
+
+      const newLogo = {
+        fieldname: file.fieldname,
+        originalname: file.originalname,
+        mimetype: file.mimetype,
+        upid: file.id,
+        filename: file.filename,
+        metadata: file.metadata,
+        uploadDate: file.uploadDate,
+        contentType: file.contentType
+      };
+
+      if (club.logo.length > 0) {
+        gfs.remove(
+          { _id: club.logo[0].upid, root: "uploads" },
+          (err, gridStore) => {
+            if (err) {
+              return res.status(404).json({ err: err });
+            }
+          }
+        );
+      }
+      club.logo.splice(0, 1);
+      club.logo.push(newLogo);
+      club
+        .save()
+        .then(club => res.json(club))
+        .catch(err => res.status(404).json(err));
+    });
+  }
+});
+
+app.post("/api/club/upload/album/:id", upload.array("files"), (req, res) => {
+  const files = req.files;
+
+  if (file.id) {
+    GolfClubRecentEventAlbum.findOne({ _id: req.params.id }, (err, album) => {
+      if (err) throw err;
+      const images = [];
+
+      for (let i = 0; i < files.length; i++) {
+        const image = {
+          fieldname: files[0].fieldname,
+          originalname: files[0].originalname,
+          mimetype: files[0].mimetype,
+          upid: files[0].id,
+          filename: files[0].filename,
+          metadata: files[0].metadata,
+          uploadDate: files[0].uploadDate,
+          contentType: files[0].contentType
+        };
+
+        images.push(image);
+      }
+
+      album.images.push(images);
+      event.save(err => {
+        if (err) return res.status(404).json({ err: err });
+
+        GolfClubRecentEventAlbum.findOne({ _id: req.params.id })
+          .populate(["club_id"])
           .exec((err, ev) => {
             if (err) throw err;
 

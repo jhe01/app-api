@@ -19,7 +19,9 @@ router.post(
     }
     const newGolfClub = new GolfClub({
       name: req.body.name,
-      description: req.body.description
+      description: req.body.description,
+      address: req.body.address,
+      maintenance_day: req.body.maintenance_day
     });
     newGolfClub
       .save()
@@ -86,6 +88,196 @@ router.post(
       });
 
       updateCourse[0].name = req.body.name;
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclub/policy/add
+router.post(
+  "/policy/add",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findOne({ _id: req.body.clubid }, (err, club) => {
+      if (err) throw err;
+
+      const newPolicy = {
+        name: req.body.name,
+        is_allowed: req.body.is_allowed
+      };
+      club.policies.push(newPolicy);
+
+      club.save().then(club => res.json(club));
+    });
+  }
+);
+
+//@route /golfclub/policy/delete
+router.post(
+  "/policy/delete/:clubid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+
+      const removeIndex = club.policies
+        .map(policy => policy.id)
+        .indexOf(req.body.policyid);
+
+      club.policies.splice(removeIndex, 1);
+
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclub/policy/update/:clubid
+router.post(
+  "/policy/update/:clubid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+      const updatePolicy = club.policies.filter(policy => {
+        return policy.id === req.body.policyid;
+      });
+
+      updatePolicy[0].name = req.body.name;
+      updatePolicy[0].is_allowed = req.body.is_allowed;
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclubs/service/add
+router.post(
+  "/service/add",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findOne({ _id: req.body.clubid }, (err, club) => {
+      if (err) throw err;
+
+      const newService = {
+        name: req.body.name
+      };
+      club.services.push(newService);
+
+      club.save().then(club => res.json(club));
+    });
+  }
+);
+
+//@route /golfclubs/service/delete
+router.post(
+  "/service/delete/:clubid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+
+      const removeIndex = club.services
+        .map(service => service.id)
+        .indexOf(req.body.serviceid);
+
+      club.services.splice(removeIndex, 1);
+
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclubs/service/update/:clubid
+router.post(
+  "/service/update/:clubid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+
+      const updateService = club.services.filter(service => {
+        return service.id === req.body.serviceid;
+      });
+
+      updateService[0].name = req.body.name;
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclub/facility/add
+router.post(
+  "/facility/add",
+  //passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findOne({ _id: req.body.clubid }, (err, club) => {
+      if (err) throw err;
+
+      const newFacility = {
+        name: req.body.name
+      };
+      club.facilities.push(newFacility);
+
+      club.save().then(club => res.json(club));
+    });
+  }
+);
+
+//@route /golfclub/facility/delete
+router.post(
+  "/facility/delete/:clubid",
+  //passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+
+      const removeIndex = club.facilities
+        .map(facility => facility.id)
+        .indexOf(req.body.facilityid);
+
+      club.facilities.splice(removeIndex, 1);
+
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
+//@route /golfclub/facility/update/:clubid
+router.post(
+  "/facility/update/:clubid",
+  //passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+
+      const updatFacility = club.facilities.filter(facility => {
+        return facility.id === req.body.facilityid;
+      });
+
+      updatFacility[0].name = req.body.name;
       club.save().then(club => res.json(club));
     }).catch(err => res.status(404).json(err));
   }
