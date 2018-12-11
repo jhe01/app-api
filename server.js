@@ -152,7 +152,7 @@ app.post("/api/upload/add/:id", upload.single("file"), (req, res) => {
 app.post("/api/club/upload/add/:id", upload.single("file"), (req, res) => {
   const file = req.file;
 
-  if (file.id) {
+  if (req.params.id) {
     GolfClubs.findOne({ _id: req.params.id }, (err, club) => {
       if (err) throw err;
 
@@ -160,7 +160,7 @@ app.post("/api/club/upload/add/:id", upload.single("file"), (req, res) => {
         fieldname: file.fieldname,
         originalname: file.originalname,
         mimetype: file.mimetype,
-        upid: file.id,
+        upid: req.params.id,
         filename: file.filename,
         metadata: file.metadata,
         uploadDate: file.uploadDate,
@@ -190,41 +190,81 @@ app.post("/api/club/upload/add/:id", upload.single("file"), (req, res) => {
 app.post("/api/club/upload/album/:id", upload.array("files"), (req, res) => {
   const files = req.files;
 
-  if (file.id) {
+  if (req.params.id) {
     GolfClubRecentEventAlbum.findOne({ _id: req.params.id }, (err, album) => {
       if (err) throw err;
-      const images = [];
 
       for (let i = 0; i < files.length; i++) {
         const image = {
-          fieldname: files[0].fieldname,
-          originalname: files[0].originalname,
-          mimetype: files[0].mimetype,
-          upid: files[0].id,
-          filename: files[0].filename,
-          metadata: files[0].metadata,
-          uploadDate: files[0].uploadDate,
-          contentType: files[0].contentType
+          fieldname: files[i].fieldname,
+          originalname: files[i].originalname,
+          mimetype: files[i].mimetype,
+          upid: files[i].id,
+          filename: files[i].filename,
+          metadata: files[i].metadata,
+          uploadDate: files[i].uploadDate,
+          contentType: files[i].contentType
         };
 
-        images.push(image);
+        album.images.push(image);
       }
 
-      album.images.push(images);
-      event.save(err => {
-        if (err) return res.status(404).json({ err: err });
+      album.save(err => {
+        if (err) return res.status(500).json({ err: err });
 
         GolfClubRecentEventAlbum.findOne({ _id: req.params.id })
           .populate(["club_id"])
-          .exec((err, ev) => {
+          .exec((err, albm) => {
             if (err) throw err;
 
-            res.json(ev);
+            res.json(albm);
           });
       });
     });
   }
 });
+
+app.post(
+  "/api/club/upload/multiple/:id/:type",
+  upload.array("files"),
+  (req, res) => {
+    const files = req.files;
+    if (req.params.id) {
+      GolfClubs.findOne({ _id: req.params.id }, (err, club) => {
+        if (err) throw err;
+
+        for (let i = 0; i < files.length; i++) {
+          const image = {
+            caption: files[i].originalname,
+            fieldname: files[i].fieldname,
+            originalname: files[i].originalname,
+            mimetype: files[i].mimetype,
+            upid: files[i].id,
+            filename: files[i].filename,
+            metadata: files[i].metadata,
+            uploadDate: files[i].uploadDate,
+            contentType: files[i].contentType
+          };
+
+          if (req.params.type === "fairway") {
+            club.fairway_images.push(image);
+          } else if (req.params.type === "facility") {
+            club.facility_images.push(image);
+          } else {
+            return res
+              .status(404)
+              .json({ err: "Something is not right on request." });
+          }
+        }
+
+        club
+          .save()
+          .then(club => res.json(club))
+          .catch(err => res.status(500).json({ err: err }));
+      });
+    }
+  }
+);
 
 app.get("/api/upload/image/:filename", (req, res) => {
   gfs.files.findOne({ filename: req.params.filename }, (err, file) => {
@@ -252,12 +292,78 @@ app.get("/api/upload/image/:filename", (req, res) => {
   });
 });
 
+app.delete("/api/upload/album/:id/:fileid", (req, res) => {
+  if (req.params.id && req.params.fileid) {
+    gfs.remove(
+      { _id: req.params.fileid, root: "uploads" },
+      (err, gridStore) => {
+        if (err) return res.status(404).json({ err: err });
+
+        GolfClubRecentEventAlbum.findOne(
+          { _id: req.params.id },
+          (err, album) => {
+            if (err) res.status(500).send(err);
+
+            const idx = album.images
+              .map(img => img.upid)
+              .indexOf(req.params.fileid);
+            console.log(idx, req.params.fileid);
+            album.images.splice(idx, 1);
+            album.save().then(albm => res.json(albm));
+          }
+        );
+      }
+    );
+  } else {
+    return res.status(500).json({ err: "Something went wrong!" });
+  }
+});
+
 app.delete("/api/upload/files/:id", (req, res) => {
   gfs.remove({ _id: req.params.id, root: "uploads" }, (err, gridStore) => {
     if (err) {
       return res.status(404).json({ err: err });
     }
   });
+});
+
+app.delete("/api/club/upload/files/:clubid/:type/:fileid", (req, res) => {
+  if (req.params.fileid && req.params.clubid) {
+    gfs.remove(
+      { _id: req.params.fileid, root: "uploads" },
+      (err, gridStore) => {
+        if (err) {
+          return res.status(404).json({ err: err });
+        }
+
+        GolfClubs.findOne({ _id: req.params.clubid }, (err, club) => {
+          if (err) res.status(500).send(err);
+
+          let idx = -1;
+          if (req.params.type === "fairway") {
+            idx = club.fairway_images
+              .map(fairway => fairway.upid)
+              .indexOf(req.params.fileid);
+
+            club.fairway_images.splice(idx, 1);
+          } else if (req.params.type === "facility") {
+            idx = club.facility_images
+              .map(facility => facility.upid)
+              .indexOf(req.params.fileid);
+
+            club.facility_images.splice(idx, 1);
+          } else {
+            return res
+              .status(404)
+              .json({ err: "Something is not right on request." });
+          }
+          club.save().then(club => res.json(club));
+        });
+      }
+    );
+  } else {
+    return res.status(404).json({ err: "Something is not right on request." });
+  }
 });
 
 const port = process.env.PORT || 5000;

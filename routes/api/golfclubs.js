@@ -93,6 +93,37 @@ router.post(
   }
 );
 
+//@route /golfclub/image/update/:clubid/:type
+router.post(
+  "/image/update/:clubid/:type",
+  //passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // const { errors, isValid } = validateAddGolfCourseInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    GolfClub.findById(req.params.clubid, (err, club) => {
+      if (err) res.status(500).send(err);
+      if (req.params.type === "fairway") {
+        const updateFwy = club.fairway_images.filter(fwyImage => {
+          return fwyImage.id === req.body.id;
+        });
+
+        updateFwy[0].caption = req.body.caption;
+      } else if (req.params.type === "facility") {
+        const updateFclty = club.facility_images.filter(fclty => {
+          return fclty.id === req.body.id;
+        });
+
+        updateFclty[0].caption = req.body.caption;
+      } else {
+        return res.status(500).json({ err: "Type is invalid" });
+      }
+      club.save().then(club => res.json(club));
+    }).catch(err => res.status(404).json(err));
+  }
+);
+
 //@route /golfclub/policy/add
 router.post(
   "/policy/add",
@@ -223,7 +254,7 @@ router.post(
 //@route /golfclub/facility/add
 router.post(
   "/facility/add",
-  //passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     // const { errors, isValid } = validateAddGolfCourseInput(req.body);
     // if (!isValid) {
@@ -245,7 +276,7 @@ router.post(
 //@route /golfclub/facility/delete
 router.post(
   "/facility/delete/:clubid",
-  //passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     GolfClub.findById(req.params.clubid, (err, club) => {
       if (err) res.status(500).send(err);
@@ -264,7 +295,7 @@ router.post(
 //@route /golfclub/facility/update/:clubid
 router.post(
   "/facility/update/:clubid",
-  //passport.authenticate("jwt", { session: false }),
+  passport.authenticate("jwt", { session: false }),
   (req, res) => {
     // const { errors, isValid } = validateAddGolfCourseInput(req.body);
     // if (!isValid) {
@@ -318,7 +349,7 @@ router.get(
 //@route /golfclub/get/id
 router.get(
   "/get/:id",
-  passport.authenticate("jwt", { session: false }),
+  //passport.authenticate("jwt", { session: false }),
   (req, res) => {
     GolfClub.findById(req.params.id).then(club => {
       res.json(club);
