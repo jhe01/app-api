@@ -245,7 +245,6 @@ app.post(
             uploadDate: files[i].uploadDate,
             contentType: files[i].contentType
           };
-
           if (req.params.type === "fairway") {
             club.fairway_images.push(image);
           } else if (req.params.type === "facility") {
@@ -307,7 +306,7 @@ app.delete("/api/upload/album/:id/:fileid", (req, res) => {
             const idx = album.images
               .map(img => img.upid)
               .indexOf(req.params.fileid);
-            console.log(idx, req.params.fileid);
+
             album.images.splice(idx, 1);
             album.save().then(albm => res.json(albm));
           }
@@ -339,18 +338,18 @@ app.delete("/api/club/upload/files/:clubid/:type/:fileid", (req, res) => {
         GolfClubs.findOne({ _id: req.params.clubid }, (err, club) => {
           if (err) res.status(500).send(err);
 
-          let idx = -1;
           if (req.params.type === "fairway") {
-            idx = club.fairway_images
+            const idx = club.fairway_images
               .map(fairway => fairway.upid)
               .indexOf(req.params.fileid);
 
             club.fairway_images.splice(idx, 1);
           } else if (req.params.type === "facility") {
-            idx = club.facility_images
+            const idx = club.facility_images
               .map(facility => facility.upid)
               .indexOf(req.params.fileid);
 
+            console.log(idx);
             club.facility_images.splice(idx, 1);
           } else {
             return res

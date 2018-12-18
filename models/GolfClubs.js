@@ -74,7 +74,7 @@ const GolfClubsSchema = new Schema({
       },
       is_allowed: {
         type: Boolean,
-        required: false
+        default: true
       }
     }
   ],
