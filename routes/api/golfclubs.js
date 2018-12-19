@@ -142,26 +142,14 @@ router.post(
       };
       club.policies.push(newPolicy);
 
-      club.save(err => {
-        if (err) res.status(500).json(err);
-
-        GolfClub.findById(req.params.clubid)
-          .lean()
-          .then(clb => {
-            GolfClubRecentEventAlbum.find(
-              { club_id: clb._id },
-              (err, albums) => {
-                clb.recent_event_albums = albums;
-                res.json(clb);
-              }
-            );
-          });
+      club.save().then(club => {
+        res.json(club.policies);
       });
     });
   }
 );
 
-//@route /golfclub/policy/delete
+//@route /golfclub/policy/delete/:clubid
 router.post(
   "/policy/delete/:clubid",
   passport.authenticate("jwt", { session: false }),
@@ -175,7 +163,7 @@ router.post(
 
       club.policies.splice(removeIndex, 1);
 
-      club.save().then(club => res.json(club));
+      club.save().then(club => res.json(club.policies));
     }).catch(err => res.status(404).json(err));
   }
 );
@@ -197,35 +185,26 @@ router.post(
 
       updatePolicy[0].name = req.body.name;
       updatePolicy[0].is_allowed = req.body.is_allowed;
-      club.save(err => {
-        if (err) res.status(500).json(err);
-
-        GolfClub.findById(req.params.clubid)
-          .lean()
-          .then(club => {
-            GolfClubRecentEventAlbum.find(
-              { club_id: req.params.clubid },
-              (err, albums) => {
-                club.recent_event_albums = albums;
-                res.json(club);
-              }
-            );
-          });
+      club.save().then(club => {
+        const rPolicy = club.policies.filter(policy => {
+          return policy.id === req.body.policyid;
+        });
+        res.json(rPolicy);
       });
     }).catch(err => res.status(404).json(err));
   }
 );
 
-//@route /golfclubs/service/add
+//@route /golfclubs/service/add/:clubid
 router.post(
-  "/service/add",
+  "/service/add/:clubid",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     // const { errors, isValid } = validateAddGolfCourseInput(req.body);
     // if (!isValid) {
     //   return res.status(400).json(errors);
     // }
-    GolfClub.findOne({ _id: req.body.clubid }, (err, club) => {
+    GolfClub.findOne({ _id: req.params.clubid }, (err, club) => {
       if (err) throw err;
 
       const newService = {
@@ -233,7 +212,7 @@ router.post(
       };
       club.services.push(newService);
 
-      club.save().then(club => res.json(club));
+      club.save().then(club => res.json(club.services));
     });
   }
 );
@@ -252,7 +231,7 @@ router.post(
 
       club.services.splice(removeIndex, 1);
 
-      club.save().then(club => res.json(club));
+      club.save().then(club => res.json(club.services));
     }).catch(err => res.status(404).json(err));
   }
 );
@@ -274,21 +253,27 @@ router.post(
       });
 
       updateService[0].name = req.body.name;
-      club.save().then(club => res.json(club));
+      club.save().then(club => {
+        const rService = club.services.filter(service => {
+          return service.id === req.body.serviceid;
+        });
+
+        res.json(rService);
+      });
     }).catch(err => res.status(404).json(err));
   }
 );
 
 //@route /golfclub/facility/add
 router.post(
-  "/facility/add",
+  "/facility/add/:clubid",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
     // const { errors, isValid } = validateAddGolfCourseInput(req.body);
     // if (!isValid) {
     //   return res.status(400).json(errors);
     // }
-    GolfClub.findOne({ _id: req.body.clubid }, (err, club) => {
+    GolfClub.findOne({ _id: req.params.clubid }, (err, club) => {
       if (err) throw err;
 
       const newFacility = {
@@ -296,7 +281,7 @@ router.post(
       };
       club.facilities.push(newFacility);
 
-      club.save().then(club => res.json(club));
+      club.save().then(club => res.json(club.facilities));
     });
   }
 );
@@ -315,7 +300,7 @@ router.post(
 
       club.facilities.splice(removeIndex, 1);
 
-      club.save().then(club => res.json(club));
+      club.save().then(club => res.json(club.facilities));
     }).catch(err => res.status(404).json(err));
   }
 );
@@ -337,7 +322,13 @@ router.post(
       });
 
       updatFacility[0].name = req.body.name;
-      club.save().then(club => res.json(club));
+      club.save().then(club => {
+        const rFacility = club.facilities.filter(facility => {
+          return facility.id === req.body.facilityid;
+        });
+
+        res.json(rFacility);
+      });
     }).catch(err => res.status(404).json(err));
   }
 );

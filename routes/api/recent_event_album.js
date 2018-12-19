@@ -26,6 +26,24 @@ router.get(
   }
 );
 
+//@route /album/get/:id/:type/:albumid
+router.get(
+  "/get/one/:id/:type",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
+    if (req.params.type === "club") {
+      GolfClubRecentEventAlbum.findById(req.params.id, (err, album) => {
+        if (err) throw err;
+
+        res.json(album);
+      });
+    }
+  }
+);
+
 //@route /album/add/:type
 router.post(
   "/add/:type",
