@@ -66,6 +66,30 @@ const GolfClubsSchema = new Schema({
     type: String,
     required: false
   },
+  contact: [
+    {
+      contact_name: {
+        type: String,
+        required: true
+      },
+      contact_value: {
+        type: String,
+        required: true
+      }
+    }
+  ],
+  social_media: [
+    {
+      social_media_name: {
+        type: String,
+        required: true
+      },
+      social_media_link: {
+        type: String,
+        required: true
+      }
+    }
+  ],
   policies: [
     {
       name: {

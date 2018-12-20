@@ -338,14 +338,14 @@ router.post(
   "/update/:id",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {
-    const { errors, isValid } = validateAddGolfClubInput(req.body);
-    if (!isValid) {
-      return res.status(400).json(errors);
-    }
+    // const { errors, isValid } = validateAddGolfClubInput(req.body);
+    // if (!isValid) {
+    //   return res.status(400).json(errors);
+    // }
     let club = req.body;
     club.date_updated = new Date();
     GolfClub.findByIdAndUpdate(
-      req.body._id,
+      req.params.id,
       { $set: club },
       { new: true }
     ).then(club => res.json(club));

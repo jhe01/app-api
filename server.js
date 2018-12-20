@@ -298,19 +298,16 @@ app.delete("/api/upload/album/:id/:fileid", (req, res) => {
       (err, gridStore) => {
         if (err) return res.status(404).json({ err: err });
 
-        GolfClubRecentEventAlbum.findOne(
-          { _id: req.params.id },
-          (err, album) => {
-            if (err) res.status(500).send(err);
+        GolfClubRecentEventAlbum.findById(req.params.id, (err, album) => {
+          if (err) res.status(500).send(err);
 
-            const idx = album.images
-              .map(img => img.upid)
-              .indexOf(req.params.fileid);
+          const idx = album.images
+            .map(img => img.upid)
+            .indexOf(req.params.fileid);
 
-            album.images.splice(idx, 1);
-            album.save().then(albm => res.json(albm));
-          }
-        );
+          album.images.splice(idx, 1);
+          album.save().then(albm => res.json(albm));
+        });
       }
     );
   } else {
@@ -348,7 +345,6 @@ app.delete("/api/club/upload/files/:clubid/:type/:fileid", (req, res) => {
             const idx = club.facility_images
               .map(facility => facility.upid)
               .indexOf(req.params.fileid);
-
             console.log(idx);
             club.facility_images.splice(idx, 1);
           } else {
