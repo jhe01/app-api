@@ -416,4 +416,124 @@ router.post(
   }
 );
 
+//@route /social-media/add/:clubid
+// Add Social Media
+router.post(
+  "/social-media/add/:club_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const newSocialMedia = {
+        social_media_name: req.body.name,
+        social_media_link: req.body.link
+      };
+
+      club.social_media.push(newSocialMedia);
+      club.save().then(club => res.json(club.social_media));
+    });
+  }
+);
+
+//@route /social-media/update/:clubid/:social_media_id
+// Update Social Media
+router.post(
+  "/social-media/update/:club_id/:social_media_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const toUpdateSocialMedia = club.social_media.filter(
+        smedia => smedia.id === req.params.social_media_id
+      );
+
+      toUpdateSocialMedia[0].social_media_name = req.body.name;
+      toUpdateSocialMedia[0].social_media_link = req.body.link;
+
+      club.save().then(club => res.json(club.social_media));
+    });
+  }
+);
+
+//@route /social-media/delete/:clubid/:social_media_id
+// Delete Social Media
+router.delete(
+  "/social-media/delete/:club_id/:social_media_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const idx = club.social_media
+        .map(smedia => smedia.id)
+        .indexOf(req.params.social_media_id);
+
+      club.social_media.splice(idx, 1);
+      club.save().then(club => res.json(club.social_media));
+    });
+  }
+);
+
+//@route /contact/add/:club_id
+// Add Contact
+router.post(
+  "/social-media/add/:club_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const newContact = {
+        contact_name: req.body.name,
+        contact_value: req.body.value
+      };
+
+      club.contact.push(newContact);
+      club.save().then(club => res.json(club.contact));
+    });
+  }
+);
+
+//@route /contact/update/:club_id/:contact_id
+// Update Contact
+router.post(
+  "/contact/update/:club_id/:contact_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const toUpdateContact = club.contact.filter(
+        contact => contact.id === req.params.contact_id
+      );
+
+      toUpdateContact[0].contact_name = req.body.name;
+      toUpdateContact[0].contact_value = req.body.value;
+
+      club.save().then(club => res.json(club.contact));
+    });
+  }
+);
+
+//@route /social-media/delete/:club_id/:contact_id
+// Delete Social Media
+router.delete(
+  "/social-media/delete/:club_id/:contact_id",
+  passport.authenticate(),
+  (res, req) => {
+    GolfClub.findById(req.params.club_id, (err, club) => {
+      if (err) res.status(500).json(err);
+
+      const idx = club.contact
+        .map(contact => contact.id)
+        .indexOf(req.params.contact_id);
+
+      club.contact.splice(idx, 1);
+      club.save().then(club => res.json(club.contact));
+    });
+  }
+);
+
 module.exports = router;
