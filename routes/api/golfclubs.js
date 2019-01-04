@@ -420,14 +420,14 @@ router.post(
 // Add Social Media
 router.post(
   "/social-media/add/:club_id",
-  passport.authenticate(),
-  (res, req) => {
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
     GolfClub.findById(req.params.club_id, (err, club) => {
       if (err) res.status(500).json(err);
 
       const newSocialMedia = {
-        social_media_name: req.body.name,
-        social_media_link: req.body.link
+        social_media_name: req.body.social_media_name,
+        social_media_link: req.body.social_media_link
       };
 
       club.social_media.push(newSocialMedia);
@@ -440,8 +440,8 @@ router.post(
 // Update Social Media
 router.post(
   "/social-media/update/:club_id/:social_media_id",
-  passport.authenticate(),
-  (res, req) => {
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
     GolfClub.findById(req.params.club_id, (err, club) => {
       if (err) res.status(500).json(err);
 
@@ -449,8 +449,8 @@ router.post(
         smedia => smedia.id === req.params.social_media_id
       );
 
-      toUpdateSocialMedia[0].social_media_name = req.body.name;
-      toUpdateSocialMedia[0].social_media_link = req.body.link;
+      toUpdateSocialMedia[0].social_media_name = req.body.social_media_name;
+      toUpdateSocialMedia[0].social_media_link = req.body.social_media_link;
 
       club.save().then(club => res.json(club.social_media));
     });
@@ -461,8 +461,8 @@ router.post(
 // Delete Social Media
 router.delete(
   "/social-media/delete/:club_id/:social_media_id",
-  passport.authenticate(),
-  (res, req) => {
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
     GolfClub.findById(req.params.club_id, (err, club) => {
       if (err) res.status(500).json(err);
 
@@ -479,15 +479,15 @@ router.delete(
 //@route /contact/add/:club_id
 // Add Contact
 router.post(
-  "/social-media/add/:club_id",
-  passport.authenticate(),
-  (res, req) => {
-    GolfClub.findById(req.params.club_id, (err, club) => {
+  "/contact/add/:clubid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
       if (err) res.status(500).json(err);
 
       const newContact = {
-        contact_name: req.body.name,
-        contact_value: req.body.value
+        contact_name: req.body.contact_name,
+        contact_value: req.body.contact_value
       };
 
       club.contact.push(newContact);
@@ -499,36 +499,36 @@ router.post(
 //@route /contact/update/:club_id/:contact_id
 // Update Contact
 router.post(
-  "/contact/update/:club_id/:contact_id",
-  passport.authenticate(),
-  (res, req) => {
-    GolfClub.findById(req.params.club_id, (err, club) => {
+  "/contact/update/:clubid/:contactid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
       if (err) res.status(500).json(err);
 
       const toUpdateContact = club.contact.filter(
-        contact => contact.id === req.params.contact_id
+        contact => contact.id === req.params.contactid
       );
 
-      toUpdateContact[0].contact_name = req.body.name;
-      toUpdateContact[0].contact_value = req.body.value;
+      toUpdateContact[0].contact_name = req.body.contact_name;
+      toUpdateContact[0].contact_value = req.body.contact_value;
 
       club.save().then(club => res.json(club.contact));
     });
   }
 );
 
-//@route /social-media/delete/:club_id/:contact_id
-// Delete Social Media
+//@route /contact/delete/:club_id/:contact_id
+// Delete Contact
 router.delete(
-  "/social-media/delete/:club_id/:contact_id",
-  passport.authenticate(),
-  (res, req) => {
-    GolfClub.findById(req.params.club_id, (err, club) => {
+  "/contact/delete/:clubid/:contactid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    GolfClub.findById(req.params.clubid, (err, club) => {
       if (err) res.status(500).json(err);
 
       const idx = club.contact
         .map(contact => contact.id)
-        .indexOf(req.params.contact_id);
+        .indexOf(req.params.contactid);
 
       club.contact.splice(idx, 1);
       club.save().then(club => res.json(club.contact));
